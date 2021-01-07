@@ -1,20 +1,22 @@
 """Loads a configuration and imports data points into InfluxDB"""
 from datetime import datetime, timezone
 import yaml
-from influxdb import InfluxDBClient
+from influxdb_client import InfluxDBClient
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 class InfluxDBUploader:
     """Uploads data points to an InfluxDB instance"""
     def __init__(self, config_path):
         self.config = self._load_config(config_path)
+        self.client = InfluxDBClient(**self.config['influxdb']['client'])
+        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
 
     def upload(self, data_points=None):
         """Uploads data points to InfluxDB"""
         if data_points is not None and len(data_points):
-            client = InfluxDBClient(**self.config['influxdb']['client'])
-            # only creates a DB if none exists
-            client.create_database(self.config['influxdb']['client']['database'])
-            client.write_points(points=data_points, **self.config['influxdb']['write_points'])
+            # write points
+            self.write_api.write(bucket=self.config['influxdb']['client']['bucket_name'],
+                                record=data_points, **self.config['influxdb']['write_points'])
 
     def create_point(self, measurement, time, fields, tags=None):
         """Helps enforce proper InfluxDB point creation"""

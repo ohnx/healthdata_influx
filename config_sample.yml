@@ -1,9 +1,11 @@
 # configure with params from the docs: 
-# http://influxdb-python.readthedocs.io/en/latest/api-documentation.html#influxdbclient
+# https://influxdb-client.readthedocs.io/en/latest/api.html#influxdbclient
 
 influxdb:
   client:
-    host: localhost
-    database: health
+    url: http://localhost:8086/
+    token: token
+    org: org
+    bucket_name: health
   write_points:
     batch_size: 1000
